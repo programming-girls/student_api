@@ -5,8 +5,9 @@ from flask_login import LoginManager
 
 from manage import app, db
 
-from src.exam.models.model import Exam, Subject, Question, SubQuestion, Answers, Image
+from src.exam.models.model import Exam, Subject, Question, SubQuestion, Answer, Image, Exams_Done, Student_Answer
 from src.users.models.user import User
+from src.users.models.user_class import Student, Parent
 
 from src.orc_engine.ocr_server import ocr_core, ocr
 from src.users.views.user import auth
@@ -22,17 +23,27 @@ admin.add_view(ModelView(Exam, db.session))
 admin.add_view(ModelView(Subject, db.session))
 admin.add_view(ModelView(Question, db.session))
 admin.add_view(ModelView(SubQuestion, db.session))
-admin.add_view(ModelView(Answers, db.session))
+admin.add_view(ModelView(Answer, db.session))
 admin.add_view(ModelView(Image, db.session))
+admin.add_view(ModelView(Student, db.session))
+admin.add_view(ModelView(Parent, db.session))
+admin.add_view(ModelView(Exams_Done, db.session))
+admin.add_view(ModelView(Student_Answer, db.session))
 
 with app.app_context():
     from src.users.models.user import User
-    from src.exam.models.model import Exam, Subject, Question, SubQuestion, Answers, Image
+    from src.users.models.user_class import Student, Parent
+    from src.exam.models.model import Exam, Subject, Question, SubQuestion, Answer, Image, Exams_Done, Student_Answer
 
     db.init_app(app)
     db.create_all()
     login_manager.init_app(app)
     login_manager.login_view = "login"
+
+ # Set up user_loader
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @app.route('/')
 def hello():

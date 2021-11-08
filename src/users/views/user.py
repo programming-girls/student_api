@@ -1,9 +1,9 @@
 from flask import Blueprint, Response
 from flask_login import login_required, login_user, logout_user
 
-from src.forms.user import LoginForm, RegistrationForm
+from src.users.forms.user_form import LoginForm, RegistrationForm
 from manage import db
-from ..models.user import User
+from src.users.models.user import User
 
 auth = Blueprint('auth', __name__)
 

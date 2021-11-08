@@ -1,7 +1,7 @@
 import jwt
 from manage import db, app
 import datetime as dt
-from flask_login import UserMixin, login_manager
+from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -64,16 +64,10 @@ class User(UserMixin, db.Model):
         except jwt.InvalidTokenError:
             return "Invalid token. Please log in again."
 
-    def __init__(self):
-        super().__init__()
+    def __repr__(self):
+        return "<User: {}>".format(self.username)
 
-    def __repr__(self) -> str:
-        return super().__repr__()
 
- # Set up user_loader
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 
     
