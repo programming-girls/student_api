@@ -10,8 +10,8 @@ a parent can have more than one student
 '''
 
 Parents_Children=db.Table('parents_children',
-    db.Column('parent_id', db.Integer, db.ForeignKey('parent.id')),
-    db.Column('student_id', db.Integer, db.ForeignKey('student.id'))
+    db.Column('parent_id', db.Integer, db.ForeignKey('parent.parent_id')),
+    db.Column('student_id', db.Integer, db.ForeignKey('student.student_id'))
 )
 
 class Person(db.Model):
@@ -21,6 +21,9 @@ class Person(db.Model):
     email = db.Column(db.String, unique=True, nullable=False)
     password_hash = db.Column(db.String, unique=True, nullable=False)
     person_type = db.Column(db.Boolean, default=False)
+    gender = db.Column(db.String, unique=True, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
 
     __mapper_args__ = {
         "polymorphic_identity": "person",
@@ -33,10 +36,10 @@ class Person(db.Model):
 
 class Student(Person):
     __tablename__ = 'student'
+    student_id = db.Column(db.Integer, unique=True, primary_key=True)
     email_address = db.Column(db.String(255), db.ForeignKey(
                                 "person.email"))
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    
 
     __mapper_args__ = {
         "polymorphic_identity": "Student",
@@ -47,9 +50,10 @@ class Student(Person):
 
 class Parent(Person):
     __tablename__ = 'parent'
+    parent_id = db.Column(db.Integer, unique=True, primary_key=True)
+    email_ = db.Column(db.String(255), db.ForeignKey(
+                                "person.email"))
     children = db.relationship('Student', secondary=Parents_Children, backref=db.backref('parent', lazy='dynamic'),lazy='dynamic')
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
 
     __mapper_args__ = {
         "polymorphic_identity": "Parent",

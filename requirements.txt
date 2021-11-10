@@ -1,5 +1,7 @@
 alembic==1.7.4
+certifi==2021.10.8
 cffi==1.15.0
+charset-normalizer==2.0.7
 click==8.0.3
 cryptography==35.0.0
 dnspython==2.1.0
@@ -24,8 +26,10 @@ Pillow==8.4.0
 psycopg2==2.9.1
 pycparser==2.21
 pytesseract==0.3.8
+requests==2.26.0
 SQLAlchemy==1.4.26
 typing-extensions==3.10.0.2
+urllib3==1.26.7
 Werkzeug==2.0.2
 WTForms==2.3.3
 zipp==3.6.0

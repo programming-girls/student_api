@@ -1,9 +1,13 @@
+import json
+import os
+import requests
 from flask import Blueprint, Response
 from flask_login import login_required, login_user, logout_user
 
 from src.users.forms.user_form import LoginForm, RegistrationForm
 from manage import db
 from src.users.models.user import User
+from src.users.models.user_class import Parent, Student
 
 auth = Blueprint('auth', __name__)
 
