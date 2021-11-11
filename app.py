@@ -12,8 +12,13 @@ from src.users.models.user_class import Student, Parent
 from src.orc_engine.ocr_server import ocr_core, ocr
 from src.users.views.user import auth
 
+from src.exam.views.text_marking_scheme import text_marking_scheme
+from src.exam.views.choice_marking_scheme import choice_marking_scheme
+
 app.register_blueprint(auth)
 app.register_blueprint(ocr)
+app.register_blueprint(text_marking_scheme)
+app.register_blueprint(choice_marking_scheme)
 
 login_manager = LoginManager()
 
