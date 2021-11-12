@@ -13,6 +13,10 @@ from src.users.views.user import auth
 from src.exam.views.text_marking_scheme import text_marking_scheme
 from src.exam.views.choice_marking_scheme import choice_marking_scheme
 from src.users.views.admin_views import ad
+from src.users.views.student_view import student
+from src.users.views.parent_view import parent
+
+
 
 #register blueprints
 app.register_blueprint(auth)
@@ -20,6 +24,8 @@ app.register_blueprint(ocr)
 app.register_blueprint(text_marking_scheme)
 app.register_blueprint(choice_marking_scheme)
 app.register_blueprint(ad)
+app.register_blueprint(student)
+app.register_blueprint(parent)
 
 login_manager = LoginManager()
 
