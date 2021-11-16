@@ -1,8 +1,6 @@
-from re import A
 from flask import Blueprint,request, jsonify
 from manage import app
 from src.exam.models.model import Question_Answer, Answer,  Question
-
 
 
 choice_marking_scheme = Blueprint('choice_marking_scheme', __name__)
