@@ -11,6 +11,7 @@ class Text_marking_scheme:
         self.student_answer = student_answer
         self.correct_answer = correct_answer
         self.question_score = question_score
+    
 
     def compare_answer(self) -> int:
         score = fuzz.partial_token_set_ratio(self.student_answer, self.correct_answer)
@@ -23,7 +24,6 @@ class Text_marking_scheme:
         if fuzz_score <= 50:
             res = 0
         else:
-            print(fuzz_score)
             res = int(fuzz_score * self.question_score) // 100
 
         return res

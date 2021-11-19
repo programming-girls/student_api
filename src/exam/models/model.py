@@ -48,6 +48,7 @@ class Question(db.Model):
     __tablename__ = 'question'
     id = db.Column(db.Integer, primary_key=True)
     ques = db.Column(db.String(), nullable=False)
+    ques_score = db.Column(db.Integer, nullable=False)
     subject = db.relationship('Subject', secondary=Subject_Question, backref=db.backref('Question', lazy='dynamic'),lazy='dynamic')
 
     def __repr__(self):
@@ -81,23 +82,14 @@ class Image(db.Model):
     def __repr__(self):
         return "<Image ID: {}>".format(self.id)
 
-class Exams_Done(db.Model):
-    __tablename__ = 'exams_done'
-    id = db.Column(db.Integer, primary_key=True)
-    exam_id = db.Column(db.Integer, db.ForeignKey("exam.id"), nullable=False)
-    student_id = db.Column(db.Integer, db.ForeignKey("student.student_id"))
-    score = db.Column(db.String(), nullable=False)
-
-    def __repr__(self):
-        return "<Exams Done: {}, {}, {}, {}>".format(self.exam_id, self.student_id, self.score)
-
-
 class Student_Answer(db.Model):
     __tablename__ = 'student_answer'
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey("student.student_id"))
     question_id = db.Column(db.Integer, db.ForeignKey("question.id"))
     answer_id = db.Column(db.Integer, db.ForeignKey("answer.id"))
+    answer_text = db.Column(db.String(), nullable=True)
+    score = db.Column(db.String(), nullable=False)
 
     def __repr__(self):
-        return "<Student Answer: {}, {}, {}>".format(self.student_id, self.answer_id, self.question_id)
+        return "<Student Answer: {}, {}, {}>".format(self.student_id, self.answer_id, self.question_id, self.answer_text, self.score)

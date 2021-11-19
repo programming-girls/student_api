@@ -7,18 +7,20 @@ get leaderboard
 view other students in class
 '''
 
+from re import A
 from flask import Blueprint, request, jsonify
+import requests
 
 from ....manage import app, db
 
-from src.exam.models.model import Exam, Subject, Question, SubQuestion, Answer, Image, Exams_Done, Student_Answer
-from src.users.models.user import User
-from src.users.models.user_class import Student, Parent
+from src.exam.models.model import Student_Answer, Question_Answer, Question, Answer
+from src.users.models.user_class import Student
 
 student = Blueprint('student', __name__)
 
 user_keys = ['firstname', 'lastname', 'gender', 'email', 'password', 'person_type', 'gender', 'yob', 'name_of_physical_School', 'grade']
 exam_keys = ['student_id', 'question_id', 'answer_id']
+path = ''
 
 @student.route('/student/<int:student_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def student_view(student_id):
@@ -69,14 +71,46 @@ def student_exams(student_id):
 
     '''
     if request.method == 'GET':
-        res = Exams_Done.query.filter_by(student_id=student_id).all()
+        res = Student_Answer.query.filter_by(student_id=student_id).all()
         return jsonify([i.serialize() for i in res])
 
+    def score(ans_id,question_id, ans_text):
+        score = 0
+        if ans_id == 0 and ans_text is None:
+            score = 0
+
+        if ans_id and ans_text is None:
+            data = {
+                'question_id': question_id,
+                'student_choice': ans_id
+            }
+            score = requests.get(path + '/cms', data=data)
+
+        if ans_text and ans_id is 0:
+
+            correct_answer = Answer.query.filter_by(question_id=question_id).filter_by(ans_text).first()
+            question_score = Question.query.filter_by(id=question_id).filter_by(score).first()
+
+            data = {
+                'student_answer': ans_text,
+                'correct_answer': correct_ans_text,
+                'question_score': ans_score
+            }
+            score = requests.get(path + '/tms', data=data)
+        return score
+        
+
     if request.method == 'POST':
+
+        correct_ans_text = 'something'
+        ans_score = 100
+
         a = Student_Answer(
             student_id = student_id,
             question_id = request.form['question_id'],
-            answer_id = request.form['answer_id']
+            answer_id = request.form['answer_id'],
+            answer_text = request.form['answer_text'],
+            score = score(request.form['answer_id'], request.form['question_id'], request.form['answer_text'])
         )
         db.session.add(a)
         db.session.commit()
