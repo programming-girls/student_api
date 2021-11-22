@@ -7,7 +7,7 @@ get leaderboard
 view other students in class
 '''
 
-from re import A
+import os
 from flask import Blueprint, request, jsonify
 import requests
 
@@ -20,7 +20,7 @@ student = Blueprint('student', __name__)
 
 user_keys = ['firstname', 'lastname', 'gender', 'email', 'password', 'person_type', 'gender', 'yob', 'name_of_physical_School', 'grade']
 exam_keys = ['student_id', 'question_id', 'answer_id']
-path = ''
+path = os.environ['URL_PATH']
 
 @student.route('/student/<int:student_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def student_view(student_id):
