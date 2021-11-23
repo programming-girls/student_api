@@ -1,5 +1,4 @@
 from manage import db
-from ...exam.models.model import Exam
 import datetime as dt
 from datetime import datetime
 

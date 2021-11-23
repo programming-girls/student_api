@@ -8,22 +8,23 @@ view other students in class
 '''
 
 import os
+import unittest
 from flask import Blueprint, request, jsonify
 import requests
 
-from ....manage import app, db
+from ...manage import app, db
 
-from src.exam.models.model import Student_Answer, Question_Answer, Question, Answer
-from src.users.models.user_class import Student
+from src.models.user_class import Student
+from src.models.student_exam import Student_Answer
 
 student = Blueprint('student', __name__)
 
 user_keys = ['firstname', 'lastname', 'gender', 'email', 'password', 'person_type', 'gender', 'yob', 'name_of_physical_School', 'grade']
 exam_keys = ['student_id', 'question_id', 'answer_id']
-path = os.environ['URL_PATH']
+API_URL = os.environ['API_URL']
 
 @student.route('/student/<int:student_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def student_view(student_id):
+def student_view(student_id=None):
     '''
     CRUD for the student profile
     '''
@@ -37,11 +38,12 @@ def student_view(student_id):
             lastname = request.form['lastname'],
             email = request.form['email'],
             password = request.form['password'],
-            person_type = False,
+            person_type = 'Student',
             gender = request.form['gender'],
             yob = request.form['YOB'],
             name_of_physical_School = request.form['NOPS'],
-            grade = request.form['class']
+            grade = request.form['class'],
+            parent_id = request.form['parent_id']
         )
         db.session.add(s)
         db.session.commit()
@@ -62,6 +64,9 @@ def student_view(student_id):
         s = Student.query.filter_by(id=student_id).first()
         db.session.delete(s)
         db.session.commit()
+
+        unittest.assertFalse(Student.query.filter(id=student_id).exists())
+
         return jsonify({"message": 'student deleted succesfully'})
 
 @student.route('/student/<int:student_id>/exams', methods=['GET', 'POST', 'PUT', 'DELETE'])
@@ -74,19 +79,21 @@ def student_exams(student_id):
         res = Student_Answer.query.filter_by(student_id=student_id).all()
         return jsonify([i.serialize() for i in res])
 
-    def score(ans_id,question_id, ans_text):
+    def score(ans_id, question_id, ans_text):
         score = 0
         if ans_id == 0 and ans_text is None:
             score = 0
 
-        if ans_id and ans_text is None:
+        if ans_id is None and ans_text is None:
             data = {
                 'question_id': question_id,
                 'student_choice': ans_id
             }
-            score = requests.get(path + '/cms', data=data)
+            score = requests.get(API_URL + '/cms', data=data)
 
-        if ans_text and ans_id is 0:
+        if ans_text == 0 and ans_id == 0:
+
+            # TO: DO change correct_answer and question_score to API calls
 
             correct_answer = Answer.query.filter_by(question_id=question_id).filter_by(ans_text).first()
             question_score = Question.query.filter_by(id=question_id).filter_by(score).first()
@@ -96,7 +103,7 @@ def student_exams(student_id):
                 'correct_answer': correct_ans_text,
                 'question_score': ans_score
             }
-            score = requests.get(path + '/tms', data=data)
+            score = requests.get(API_URL + '/tms', data=data)
         return score
         
 
@@ -131,6 +138,8 @@ def student_exams(student_id):
         a = Student_Answer.query.filter_by(student_id=student_id, question_id=request.form['question_id']).first()
         db.session.delete(a)
         db.session.commit()
+
+        
         return jsonify({"message": 'answer deleted succesfully'})
 
 

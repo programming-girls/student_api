@@ -10,13 +10,32 @@ using github:
 
 clone the repo to server/localhost
 
+```git clone https://github.com/programming-girls/student_api.git```
+
 install virtualenv
+
+```virtualenv venv```
+
+activate venv
+
+``` source venv/bin/activate ```
 
 install requirements
 
+```pip install -r requirements.txt ```
+
 install .env
 
+``` source .env```
+
 start server
+
+
+```flask run```
+
+# Endpoints
+
+
 
 
 
