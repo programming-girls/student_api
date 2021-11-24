@@ -1,28 +1,33 @@
 from flask_login import LoginManager
 
 from manage import app, db
-from src.users.models.student_exam import Student_Answer
-from src.users.models.user import User
-from src.users.models.user_class import Student, Parent
+from src.models.student_exam import Student_Answer
+from src.models.user import User
+from src.models.user_class import Student, Parent
 
 #blueprints
-from src.users.views.user import auth
-from src.users.views.admin_views import ad
-from src.users.views.student_view import student
-from src.users.views.parent_view import parent
+from src.views.user import auth
+from src.views.admin_views import ad
+from src.views.student_view import student
+from src.views.parent_view import parent
+from src.views.oauth import google_blueprint
+from src.views.oauth import facebook_blueprint
+
 
 #register blueprints
 app.register_blueprint(auth)
 app.register_blueprint(ad)
 app.register_blueprint(student)
 app.register_blueprint(parent)
+app.register_blueprint(google_blueprint, url_prefix='/google')
+app.register_blueprint(facebook_blueprint, url_prefix='/facebook')
 
 login_manager = LoginManager()
 
 with app.app_context():
-    from src.users.models.user import User
-    from src.users.models.user_class import Student, Parent
-    from src.users.models.student_exam import Student_Answer
+    from src.models.user import User
+    from src.models.user_class import Student, Parent
+    from src.models.student_exam import Student_Answer
 
     db.init_app(app)
     db.create_all()
@@ -37,6 +42,17 @@ def load_user(user_id):
 @app.route('/')
 def hello():
     return "Hello World!"
+
+@app.route('/privacy_policy')
+def privacy_policy():
+    return "Privacy Policy"
+
+
+@app.route('/terms_of_service')
+def terms_of_service():
+    return "Terms of Service"
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

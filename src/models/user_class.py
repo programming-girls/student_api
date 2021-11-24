@@ -10,19 +10,20 @@ a parent can have more than one student
 
 class Person(db.Model):
     PERSON_TYPES = [
-       ('parent', 'Parent'),
-       ('student', 'Student')
+       (u'parent', u'Parent'),
+       (u'student', u'Student'),
+       (u'admin', u'Admin'),
     ]
     GENDER_TYPES = [
-       ('male', 'Male'),
-       ('female', 'Female')
+       (u'male', u'Male'),
+       (u'female', u'Female')
     ]
     id = db.Column(db.Integer, primary_key=True)
     FirstName = db.Column(db.String, nullable=False)
     LastName =  db.Column(db.String, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
     password_hash = db.Column(db.String, unique=True, nullable=False)
-    person_type = db.Column(db.ChoiceType(PERSON_TYPES),  default='parent')
+    person_type = db.Column(db.ChoiceType(PERSON_TYPES),  default='student')
     gender = db.Column(db.ChoiceType(GENDER_TYPES),  default='female')
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)

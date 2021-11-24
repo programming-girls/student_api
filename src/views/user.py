@@ -1,13 +1,15 @@
 import json
 import os
 import requests
-from flask import Blueprint, Response
+from flask import Blueprint, Response, redirect, url_for
 from flask_login import login_required, login_user, logout_user
 
-from src.users.forms.user_form import LoginForm, RegistrationForm
+from src.forms.user_form import LoginForm, RegistrationForm
 from manage import db
-from src.users.models.user import User
-from src.users.models.user_class import Parent, Student
+from src.models.user import User
+from src.models.user_class import Parent, Student
+from flask_dance.contrib.facebook import facebook
+from flask_dance.contrib.google import google
 
 auth = Blueprint('auth', __name__)
 
@@ -51,6 +53,21 @@ def login():
         # when login details are incorrect
         else:
             return Response('Invalid email or password.')
+
+
+@auth.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    pass
+
+@auth.route('/google_login', methods=['GET', 'POST'])
+def google_login():
+    url = '/google' if google.authorized else url_for('google.login')
+    return redirect(url)
+
+@auth.route('/facebook_login', methods=['GET', 'POST']) 
+def facebook_login():
+    url = '/facebook' if facebook.authorized else url_for('facebook.login')
+    return redirect(url)
 
 @auth.route('/logout')
 @login_required
