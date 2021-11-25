@@ -1,6 +1,8 @@
+from sqlalchemy_utils.functions import foreign_keys
 from manage import db
 import datetime as dt
 from datetime import datetime
+from sqlalchemy_utils import ChoiceType, EmailType
 
 '''
 For many to many relationships: 
@@ -18,13 +20,13 @@ class Person(db.Model):
        (u'male', u'Male'),
        (u'female', u'Female')
     ]
-    id = db.Column(db.Integer, primary_key=True)
-    FirstName = db.Column(db.String, nullable=False)
-    LastName =  db.Column(db.String, nullable=False)
-    email = db.Column(db.String, unique=True, nullable=False)
+
+    firstname = db.Column(db.String, nullable=False)
+    lastname =  db.Column(db.String, nullable=False)
+    email = db.Column(EmailType, unique=True, primary_key=True)
     password_hash = db.Column(db.String, unique=True, nullable=False)
-    person_type = db.Column(db.ChoiceType(PERSON_TYPES),  default='student')
-    gender = db.Column(db.ChoiceType(GENDER_TYPES),  default='female')
+    person_type = db.Column(ChoiceType(PERSON_TYPES),  default='student')
+    gender = db.Column(ChoiceType(GENDER_TYPES),  default='female')
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
 
@@ -34,36 +36,50 @@ class Person(db.Model):
     }
 
     def __repr__(self):
-        return "<{}: {} {}>".format(self.person_type, self.first_name,
-                                    self.last_name)
+        return "<{}: {} {}>".format(self.person_type, self.firstname, self.lastname)
 
 class Parent(Person):
     __tablename__ = 'parent'
-    children = db.relationship('Student', backref=db.backref('parent', lazy='dynamic'),lazy='dynamic')
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(EmailType, db.ForeignKey('person.email'))
+    children = db.relationship(
+        'Child', 
+        backref='a_parent',
+        lazy='dynamic', 
+        primaryjoin="Parent.id == Child.parent_id"
+        )
 
     __mapper_args__ = {
-        "polymorphic_identity": "Parent",
+        "polymorphic_identity": "parent",
     }
 
     def __repr__(self):
         return "<Parent ID: {}>".format(self.id)
 
-class Student(Person):
-    __tablename__ = 'student'
+class Child(Person):
+    __tablename__ = 'child'
     CHILD_TYPES = [
-       ('pupil', 'Pupil'),
-       ('student', 'Student')
+       (u'pupil', u'Pupil'),
+       (u'student', u'Student')
     ]
+    email = db.Column(EmailType, db.ForeignKey('person.email'))
+    id = db.Column(db.Integer, primary_key=True)
     name_of_physical_school = db.Column(db.String, nullable=True)
     yob = db.Column(db.DateTime, default=datetime.now)
     grade = db.Column(db.String, nullable=True)
-    child_type = db.Column(db.ChoiceType(CHILD_TYPES), default='pupil')
+    child_type = db.Column(ChoiceType(CHILD_TYPES), default='pupil')
     parent_id = db.Column(db.Integer, db.ForeignKey('parent.id'))
+    parent = db.relationship(
+        'Parent', 
+        foreign_keys=[parent_id], 
+        backref='child', 
+        lazy='joined')
 
     __mapper_args__ = {
-        "polymorphic_identity": "Student",
+        "polymorphic_identity": "child",
     }
 
     def __repr__(self):
-        return "<Student ID: {}>".format(self.id)
+        return "<Child ID: {}>".format(self.id)
 
