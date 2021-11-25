@@ -8,7 +8,7 @@ from flask_login import login_required, login_user, logout_user
 from manage import db, mail
 from flask_mail import Message
 
-from src.models.user import User
+from src.models.user_class import User
 from flask_dance.contrib.facebook import facebook
 from flask_dance.contrib.google import google
 
@@ -33,15 +33,16 @@ def register():
     if not password:
         return Response('password not provided', status=400)
     
-    user = User.query.filter_by(email=email).first()
+    user = User.query.get(email)
+
     if user:
         return Response('email already registered', status=400)
     else:
-        user = User(email=email, password=password)
+        user = User(email=email, password_hash=password)
         db.session.add(user)
         db.session.commit()
 
-        auth_token = user.generate_auth_token(user.id)
+        auth_token = user.generate_auth_token(user.email)
         responseObject = {
             'status': 'success',
             'message': 'Successfully registered.',
@@ -72,14 +73,12 @@ def login():
     if not user:
         return Response('user not found', status=400)
 
-    if not user.verify_password(password):
+    if not user.check_password(password):
         return Response('invalid password', status=400)
     
     auth_token = user.generate_auth_token(user.id)
     response = {
-        'status': 'success',
-        'message': 'Successfully logged in.',
-        'auth_token': auth_token
+        'Authorization': auth_token
     }
     return Response(json.dumps(response), status=201, mimetype='application/json')
 

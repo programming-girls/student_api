@@ -7,13 +7,10 @@ see pupil leaderboard overrall in class
 '''
 import os
 import requests
-from flask import Blueprint, request, Response
-from flask.json import jsonify
-
 from manage import app, db
-
-from src.models.user import User
-from src.models.user_class import Child, Parent
+from flask.json import jsonify
+from flask import Blueprint, request, Response
+from src.models.user_class import Child, Parent, User
 
 parent = Blueprint('parent', __name__)
 
@@ -22,41 +19,50 @@ user_keys = ['firstname', 'lastname', 'gender', 'email', 'password', 'person_typ
 
 API_URL = os.environ['API_URL']
 
-@parent.route('/parent', methods=['POST'])
-def add_parent():
-    data = request.get_json()
-    if not data:
-        return Response('Invalid Payload',status=400)
+def get_token():
+    responseObject = dict()
+    # get auth
+    auth_header = request.headers.get('Authorization')
+    if auth_header:
+        
+            auth_token = auth_header.split(" ")[1]
+    else:
+        auth_token = None
+    print(auth_token, 'hhhhhhhhhhhhhhh')
+    if not auth_token:
+        responseObject = {
+                'status': 'fail',
+                'message': 'Provide a valid auth token.'
+            }
 
-    if not all(key in data for key in parent_keys):
-        return Response('Invalid Payload',status=400)
+    resp = User.decode_auth_token(auth_token)
+    if not isinstance(resp, str):
+        user = User.query.filter_by(id=resp).first()
+        responseObject = {
+                'status': 'success',
+                'data': {
+                    'id': user.id,
+                    'email': user.email,
+                }
+            }
+    return jsonify(responseObject)
+
+@parent.route('/parent', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def parent_():
     
-    p = Parent(
-        firstname=data['firstname'],
-        lastname=data['lastname'],
-        email = data['email'],
-        password_hash = data['password_hash'],
-        person_type = data['person_type'],
-        gender = data['gender']
-    )
-    try:
-        db.session.add(p)
-        db.session.commit()
-        return Response('Success',status=200)
-    except :
-        return Response('Error', status=400)
+    user = get_token()
+
+    print('user', user)
     
-
-
-@parent.route('/parent/<int:parent_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def parent_(parent_id=None):
-    data = request.get_json()
-    if not data:
-        return Response('Invalid Payload',status=400)
+    parent_id = user['id']
 
     if request.method == 'GET':
         p = Parent.query.filter_by(id=parent_id).first()
         return jsonify(p.serialize())
+
+    data = request.get_json()
+    if not data:
+        return Response('Invalid Payload',status=400)
 
     if request.method == 'PUT':
         p = Parent.query.filter_by(id=id).first()

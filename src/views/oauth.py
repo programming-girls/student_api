@@ -5,7 +5,7 @@ from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.facebook import make_facebook_blueprint, facebook
 from flask_login import current_user, login_user
 from flask_dance.consumer import oauth_authorized
-from src.models.user import User
+from src.models.user_class import User
 
 
 API_URL = os.environ.get('API_URL')

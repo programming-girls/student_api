@@ -11,8 +11,7 @@ from flask_admin.contrib.sqla import ModelView
 
 from manage import app, db
 
-from src.models.user import User
-from src.models.user_class import Child, Parent
+from src.models.user_class import Child, Parent, User
 
 ad = Blueprint('ad', __name__)
 
