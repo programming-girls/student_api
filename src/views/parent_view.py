@@ -7,7 +7,7 @@ see pupil leaderboard overrall in class
 '''
 import os
 import requests
-from flask import Blueprint, request
+from flask import Blueprint, request, Response
 from flask.json import jsonify
 
 from manage import app, db
@@ -16,26 +16,46 @@ from src.models.user import User
 from src.models.user_class import Child, Parent
 
 parent = Blueprint('parent', __name__)
+
+parent_keys = ['firstname', 'lastname', 'email', 'password_hash', 'person_type', 'gender']
 user_keys = ['firstname', 'lastname', 'gender', 'email', 'password', 'person_type', 'gender', 'yob', 'name_of_physical_School', 'grade']
+
 API_URL = os.environ['API_URL']
+
+@parent.route('/parent', methods=['POST'])
+def add_parent():
+    data = request.get_json()
+    if not data:
+        return Response('Invalid Payload',status=400)
+
+    if not all(key in data for key in parent_keys):
+        return Response('Invalid Payload',status=400)
+    
+    p = Parent(
+        firstname=data['firstname'],
+        lastname=data['lastname'],
+        email = data['email'],
+        password_hash = data['password_hash'],
+        person_type = data['person_type'],
+        gender = data['gender']
+    )
+    try:
+        db.session.add(p)
+        db.session.commit()
+        return Response('Success',status=200)
+    except :
+        return Response('Error', status=400)
+    
 
 
 @parent.route('/parent/<int:parent_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def parent_(self, id=None):
-    if request.method == 'POST':
-        p = Parent(
-            firstname = request.form['firstname'],
-            lastname = request.form['lastname'],
-            email = request.form['email'],
-            password = request.form['password'],
-            person_type = 'Parent',
-            gender = request.form['gender']
-            )
-        db.session.add(p)
-        db.session.commit()
+def parent_(parent_id=None):
+    data = request.get_json()
+    if not data:
+        return Response('Invalid Payload',status=400)
 
     if request.method == 'GET':
-        p = Parent.query.filter_by(id=id).first()
+        p = Parent.query.filter_by(id=parent_id).first()
         return jsonify(p.serialize())
 
     if request.method == 'PUT':

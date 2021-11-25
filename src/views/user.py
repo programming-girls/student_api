@@ -40,7 +40,14 @@ def register():
         user = User(email=email, password=password)
         db.session.add(user)
         db.session.commit()
-        return Response('user added', status=200)
+
+        auth_token = user.generate_auth_token(user.id)
+        responseObject = {
+            'status': 'success',
+            'message': 'Successfully registered.',
+            'auth_token': auth_token
+        }
+        return Response(json.dumps(responseObject), status=200, mimetype='application/json')
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -67,8 +74,14 @@ def login():
 
     if not user.verify_password(password):
         return Response('invalid password', status=400)
-    login_user(user)
-    return Response('user logged in', status=200)
+    
+    auth_token = user.generate_auth_token(user.id)
+    response = {
+        'status': 'success',
+        'message': 'Successfully logged in.',
+        'auth_token': auth_token
+    }
+    return Response(json.dumps(response), status=201, mimetype='application/json')
 
 @auth.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -104,7 +117,8 @@ def reset_password(token):
         return Response('invalid token', status=400)
     user.password = password
     db.session.commit()
-    return Response('password reset', status=200)
+
+    return redirect(url_for('auth.login'))
     
     
 
