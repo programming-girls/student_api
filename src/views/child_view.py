@@ -14,6 +14,7 @@ from flask.wrappers import Response
 import requests
 
 from manage import app, db
+from src import login_required
 
 from src.models.user_auth import User
 from src.models.user_class import Child
@@ -48,30 +49,45 @@ def get_token():
             }
         return user.id
 
-
-@child.route('/child/<int:child_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def child_view(child_id=None):
+@login_required
+@child.route('/child', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def child_view():
     '''
     CRUD for the child profile
     '''
+    data = request.get_json()
+    if not data:
+        return Response('Invalid Payload',status=400)
+    
+    
+    if request.method == 'POST':
+
+        first_name = data['firstname']
+        last_name = data['lastname']
+        gender = data['gender']
+        yob = data['YOB']
+        name_of_physical_School = data['NOPS']
+        grade = data['class']
+        parent_id = data['parent_id']
+        
+        c = Child(
+            firstname = first_name,
+            lastname = last_name,
+            gender = gender,
+            yob = yob,
+            name_of_physical_School = name_of_physical_School,
+            grade = grade,
+            parent_id = parent_id
+        )
+        Child.save()
+        return Response('Success', status=201)
+
+    child_id = get_token()
+
     if request.method == 'GET':
         res = Child.query.filter_by(id=child_id).first()
-        return jsonify(res.serialize())
+        return Response(res)
 
-    if request.method == 'POST':
-        s = Child(
-            firstname = request.form['firstname'],
-            lastname = request.form['lastname'],
-            gender = request.form['gender'],
-            yob = request.form['YOB'],
-            name_of_physical_School = request.form['NOPS'],
-            grade = request.form['class'],
-            parent_id = request.form['parent_id']
-        )
-        db.session.add(s)
-        db.session.commit()
-
-        return Response('Success', status=201)
 
     if request.method == 'PUT':
         s = Child.query.filter_by(id=child_id).first()
@@ -92,6 +108,7 @@ def child_view(child_id=None):
 
         return Response('Success', status=200)
 
+@login_required
 @child.route('/child/<int:child_id>/exams', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def child_exams(child_id):
     '''

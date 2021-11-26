@@ -11,6 +11,7 @@ import random
 import requests
 from manage import app, db
 from flask.json import jsonify
+from src import login_required
 from flask import Blueprint, request, Response
 from src.models.user_class import Child, Parent
 from src.models.user_auth import User
@@ -45,7 +46,7 @@ def get_token():
             }
         return user.id
 
-
+@login_required
 @parent.route('/parent', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def parent_():
     
@@ -70,7 +71,7 @@ def parent_():
         
         first_name = data['firstname']
         last_name = data['lastname']
-        gender = data['gender'], 
+        gender = data['gender']
 
         p = Parent(
                 firstname = first_name, 
@@ -99,6 +100,7 @@ def parent_():
         db.session.commit()
         return Response('Delete success', status=200)
 
+@login_required
 @parent.route('/parents_child/<int:parent_id>/<int:child_id>', methods=['POST', 'GET', 'PUT', 'DELETE'])
 def my_child(parent_id, child_id=None):
     user = get_token() #returns user id
@@ -112,7 +114,7 @@ def my_child(parent_id, child_id=None):
         
     if request.method == 'POST':
         data = request.get_json()
-        res = requests.post(API_URL + '/student/' + str(child_id), data=data)
+        res = requests.post(API_URL + '/child', data=data)
         return Response(res.text, status=res.status_code)
 
     if request.method == 'GET':
@@ -120,12 +122,12 @@ def my_child(parent_id, child_id=None):
         return Response(s)
 
     if request.method == 'PUT':
-        res = requests.put(API_URL + '/student/' + str(child_id), data=request.get_json())
+        res = requests.put(API_URL + '/child/' + str(child_id), data=request.get_json())
         return Response(res.json())
 
 
     if request.method == 'DELETE':
-        res = requests.delete(url=app.config['API_URL'] + '/student/' + child_id)
+        res = requests.delete(url=app.config['API_URL'] + '/child/' + child_id)
         return Response(res.json())
 
 
