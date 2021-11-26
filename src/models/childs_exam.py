@@ -11,3 +11,15 @@ class Childs_Answer(db.Model):
 
     def __repr__(self):
         return "<Childs Answer: {}, {}, {}>".format(self.child_id, self.answer_id, self.question_id, self.answer_text, self.score)
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_all():
+        return Childs_Answer.query.all()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

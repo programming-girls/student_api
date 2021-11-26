@@ -10,18 +10,44 @@ view other students in class
 import os
 import unittest
 from flask import Blueprint, request, jsonify
+from flask.wrappers import Response
 import requests
 
 from manage import app, db
 
+from src.models.user_auth import User
 from src.models.user_class import Child
 from src.models.childs_exam import Childs_Answer
 
 child = Blueprint('child', __name__)
 
-user_keys = ['firstname', 'lastname', 'gender', 'email', 'password', 'person_type', 'gender', 'yob', 'name_of_physical_School', 'grade']
+user_keys = ['firstname', 'lastname', 'gender','gender', 'yob', 'name_of_physical_School', 'grade']
 exam_keys = ['child_id', 'question_id', 'answer_id']
 API_URL = os.environ['API_URL']
+
+def get_token():
+    # get auth
+    auth_header = request.headers.get('Authorization')
+    if auth_header:
+            auth_token = auth_header.split(" ")[1]
+    else:
+        auth_token = None
+    if not auth_token:
+        return False
+
+    resp = User.decode_auth_token(auth_token)
+
+    if not isinstance(resp, str):
+        user = User.query.filter_by(id=resp).first()
+        responseObject = {
+                'status': 'success',
+                'data': {
+                    'id': user.id,
+                    'email': user.email,
+                }
+            }
+        return user.id
+
 
 @child.route('/child/<int:child_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def child_view(child_id=None):
@@ -36,9 +62,6 @@ def child_view(child_id=None):
         s = Child(
             firstname = request.form['firstname'],
             lastname = request.form['lastname'],
-            email = request.form['email'],
-            password = request.form['password'],
-            person_type = request.form['child_type'],
             gender = request.form['gender'],
             yob = request.form['YOB'],
             name_of_physical_School = request.form['NOPS'],
@@ -48,7 +71,7 @@ def child_view(child_id=None):
         db.session.add(s)
         db.session.commit()
 
-        return jsonify({"message": 'child added succesfully'})
+        return Response('Success', status=201)
 
     if request.method == 'PUT':
         s = Child.query.filter_by(id=child_id).first()
@@ -58,7 +81,7 @@ def child_view(child_id=None):
             if key in user_keys:
                 setattr(s, key, new_data[key])
         db.session.commit()
-        return jsonify({"message": 'child updated succesfully'})
+        return Response('Success', status=200)
     
     if request.method == 'DELETE':
         s = Child.query.filter_by(id=child_id).first()
@@ -67,7 +90,7 @@ def child_view(child_id=None):
 
         unittest.assertFalse(Child.query.filter(id=child_id).exists())
 
-        return jsonify({"message": 'Child deleted succesfully'})
+        return Response('Success', status=200)
 
 @child.route('/child/<int:child_id>/exams', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def child_exams(child_id):

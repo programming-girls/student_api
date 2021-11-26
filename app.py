@@ -1,8 +1,11 @@
 from flask_login import LoginManager
+from flask import render_template
 
 from manage import app, db
 from src.models.childs_exam import Childs_Answer
-from src.models.user_class import Child, Parent, User
+from src.models.user_class import Child, Parent
+from src.models.user_auth import User
+
 
 #blueprints
 from src.views.user import auth
@@ -24,7 +27,8 @@ app.register_blueprint(facebook_blueprint, url_prefix='/facebook')
 login_manager = LoginManager()
 
 with app.app_context():
-    from src.models.user_class import Child, Parent, User
+    from src.models.user_class import Child, Parent
+    from src.models.user_auth import User
     from src.models.childs_exam import Childs_Answer
 
     db.init_app(app)
@@ -43,12 +47,12 @@ def hello():
 
 @app.route('/privacy_policy')
 def privacy_policy():
-    return "Privacy Policy"
+    return render_template("privacy_policy.html")
 
 
 @app.route('/terms_of_service')
 def terms_of_service():
-    return "Terms of Service"
+    return render_template("terms_of_service.html")
 
 if __name__ == '__main__':
     app.run(debug=True)

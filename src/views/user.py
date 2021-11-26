@@ -3,12 +3,11 @@ import os
 import re
 import requests
 from flask import Blueprint, Response, redirect, url_for, request
-from flask_login import login_required, login_user, logout_user
 
 from manage import db, mail
 from flask_mail import Message
 
-from src.models.user_class import User
+from src.models.user_auth import User, BlacklistToken
 from flask_dance.contrib.facebook import facebook
 from flask_dance.contrib.google import google
 
@@ -32,23 +31,24 @@ def register():
         return Response('email not provided', status=400)
     if not password:
         return Response('password not provided', status=400)
-    
-    user = User.query.get(email)
 
-    if user:
+    u = User.query.filter(User.email == email).first()
+
+    if u:
         return Response('email already registered', status=400)
     else:
-        user = User(email=email, password_hash=password)
+        user = User(email=email, password=password)
         db.session.add(user)
         db.session.commit()
 
-        auth_token = user.generate_auth_token(user.email)
-        responseObject = {
-            'status': 'success',
-            'message': 'Successfully registered.',
-            'auth_token': auth_token
-        }
-        return Response(json.dumps(responseObject), status=200, mimetype='application/json')
+
+        # to do: assert user is in db before generating token
+
+        auth_token = user.generate_auth_token(user.id)
+        response = {
+        'Authorization': auth_token
+    }
+        return Response(json.dumps(response), status=200, mimetype='application/json')
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -73,7 +73,7 @@ def login():
     if not user:
         return Response('user not found', status=400)
 
-    if not user.check_password(password):
+    if not user.verify_password(password):
         return Response('invalid password', status=400)
     
     auth_token = user.generate_auth_token(user.id)
@@ -118,9 +118,48 @@ def reset_password(token):
     db.session.commit()
 
     return redirect(url_for('auth.login'))
-    
-    
 
+@auth.route('/logout', methods=['POST'])
+def logout():
+    auth_header = request.headers.get('Authorization')
+    if auth_header:
+        auth_token = auth_header.split(" ")[1]
+    else:
+        auth_token = ''
+    if auth_token:
+        resp = User.decode_auth_token(auth_token)
+        if not isinstance(resp, str):
+            # mark the token as blacklisted
+            blacklist_token = BlacklistToken(token=auth_token)
+            try:
+                # insert the token
+                db.session.add(blacklist_token)
+                db.session.commit()
+                responseObject = {
+                    'status': 'success',
+                    'message': 'Successfully logged out.'
+                }
+                return Response(json.dumps(responseObject), status=200, mimetype='application/json')
+            except Exception as e:
+                responseObject = {
+                    'status': 'fail',
+                    'message': e
+                }
+                return Response(json.dumps(responseObject), status=200, mimetype='application/json')
+        else:
+            responseObject = {
+                'status': 'fail',
+                'message': resp
+            }
+            return Response(json.dumps(responseObject), status=200, mimetype='application/json')
+    else:
+        responseObject = {
+            'status': 'fail',
+            'message': 'Provide a valid auth token.'
+        }
+        return Response(json.dumps(responseObject), status=200, mimetype='application/json')
+    
+    
 @auth.route('/google_login', methods=['GET', 'POST'])
 def google_login():
     url = '/google' if google.authorized else url_for('google.login')
@@ -130,14 +169,3 @@ def google_login():
 def facebook_login():
     url = '/facebook' if facebook.authorized else url_for('facebook.login')
     return redirect(url)
-
-@auth.route('/logout')
-@login_required
-def logout():
-    """
-    Handle requests to the /logout route
-    Log an user out through the logout link
-    """
-    logout_user()
-    return Response('You have successfully been logged out.')
-
