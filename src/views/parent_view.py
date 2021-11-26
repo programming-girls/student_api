@@ -16,6 +16,7 @@ from flask import Blueprint, request, Response
 from src.models.user_class import Child, Parent
 from src.models.user_auth import User
 
+
 parent = Blueprint('parent', __name__)
 
 parent_keys = ['firstname', 'lastname','gender']

@@ -58,6 +58,8 @@ def child_view():
     data = request.get_json()
     if not data:
         return Response('Invalid Payload',status=400)
+
+    child_id = get_token()
     
     
     if request.method == 'POST':
@@ -77,17 +79,16 @@ def child_view():
             yob = yob,
             name_of_physical_School = name_of_physical_School,
             grade = grade,
-            parent_id = parent_id
+            parent_id = parent_id,
+            user_id = child_id
         )
-        Child.save()
+        Child.save(c)
         return Response('Success', status=201)
 
-    child_id = get_token()
 
     if request.method == 'GET':
         res = Child.query.filter_by(id=child_id).first()
         return Response(res)
-
 
     if request.method == 'PUT':
         s = Child.query.filter_by(id=child_id).first()
@@ -157,31 +158,33 @@ def child_exams(child_id):
             question_id = request.form['question_id'],
             answer_id = request.form['answer_id'],
             answer_text = request.form['answer_text'],
-            score = score(request.form['answer_id'], request.form['question_id'], request.form['answer_text'])
+            score = score(request.form['answer_id'] , request.form['question_id'], request.form['answer_text'])
         )
-        db.session.add(a)
-        db.session.commit()
-
-        return jsonify({"message": 'answer added succesfully'})
+        Childs_Answer.save(a)
+        return Response('Success', status=201)
         
     if request.method == 'PUT':
-        a = Childs_Answer.query.filter_by(child_id=child_id, question_id=request.form['question_id']).first()
         res = request.get_json()
-        res_keys = res.keys()
-        for key in res_keys:
-            if key in exam_keys:
-                setattr(a, key, res[key])
-        db.session.commit()
-        return jsonify({"message": 'answer updated succesfully'})
 
-    if request.method == 'DELETE':
-        a = Childs_Answer.query.filter_by(child_id=child_id, question_id=request.form['question_id']).first()
-        db.session.delete(a)
-        db.session.commit()
+        a = Childs_Answer.query.filter_by(child_id=child_id, question_id=res['question_id']).first()
 
+        if a:
+            new_data = request.get_json()
+            new_data_keys = new_data.keys()
+            for key in new_data_keys:
+                if key in exam_keys:
+                    setattr(a, key, new_data[key])
+            Childs_Answer.save(a)
+            return Response('Success', status=200)
+        return Response('No such question', status=404)
         
-        return jsonify({"message": 'answer deleted succesfully'})
+    if request.method == 'DELETE':
 
+        res = request.get_json()
+
+        a = Childs_Answer.query.filter_by(child_id=child_id, question_id=res['question_id']).first()
+        Childs_Answer.delete(a)
+        return Response('Success', status=200)
 
 
 

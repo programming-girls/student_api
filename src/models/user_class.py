@@ -22,8 +22,10 @@ class Person(db.Model):
     lastname =  db.Column(db.String, nullable=True)
     user_type = db.Column(db.String(50))
     gender = db.Column(ChoiceType(GENDER_TYPES), default='female')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    user = db.relationship('User', backref=db.backref('person', uselist=False), lazy='dynamic')
 
     __mapper_args__ = {
         "polymorphic_identity": "user",
