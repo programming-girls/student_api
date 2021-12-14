@@ -34,7 +34,6 @@ Pillow==8.4.0
 psycopg2-binary==2.9.2
 pycparser==2.21
 PyJWT==2.3.0
-pytesseract==0.3.8
 python-Levenshtein==0.12.2
 regex==2021.11.10
 requests==2.26.0
