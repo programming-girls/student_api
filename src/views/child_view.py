@@ -14,7 +14,7 @@ from flask.wrappers import Response
 import requests
 
 from manage import app, db
-from src import login_required
+# from src import login_required
 
 from src.models.user_auth import User
 from src.models.user_class import Child
@@ -49,7 +49,7 @@ def get_token():
             }
         return user.id
 
-@login_required
+# @login_required
 @child.route('/child', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def child_view():
     '''
@@ -109,7 +109,7 @@ def child_view():
 
         return Response('Success', status=200)
 
-@login_required
+# @login_required
 @child.route('/child/<int:child_id>/exams', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def child_exams(child_id):
     '''

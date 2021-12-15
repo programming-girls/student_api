@@ -30,6 +30,7 @@ Mako==1.1.5
 MarkupSafe==2.0.1
 nltk==3.6.5
 oauthlib==2.1.0
+parameterized==0.8.1
 Pillow==8.4.0
 psycopg2-binary==2.9.2
 pycparser==2.21

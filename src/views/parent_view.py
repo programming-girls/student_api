@@ -11,7 +11,7 @@ import random
 import requests
 from manage import app, db
 from flask.json import jsonify
-from src import login_required
+# from src import login_required
 from flask import Blueprint, request, Response
 from src.models.user_class import Child, Parent
 from src.models.user_auth import User
@@ -47,7 +47,7 @@ def get_token():
             }
         return user.id
 
-@login_required
+# @login_required
 @parent.route('/parent', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def parent_():
     
@@ -101,7 +101,7 @@ def parent_():
         db.session.commit()
         return Response('Delete success', status=200)
 
-@login_required
+# @login_required
 @parent.route('/parents_child/<int:parent_id>/<int:child_id>', methods=['POST', 'GET', 'PUT', 'DELETE'])
 def my_child(parent_id, child_id=None):
     user = get_token() #returns user id

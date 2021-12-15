@@ -101,8 +101,26 @@ def forgot_password():
     mail.send(msg)
     return Response('email sent', status=200)
 
+@auth.route('/change_password', methods=['GET', 'POST'])
+def change_password(token):
+
+    data = request.get_json()
+    if not data:
+        return Response('Invalid payload', status=400)
+    
+    password = data.get('password')
+    new_password = data.get('new_password')
+
+    if not password:
+        return Response('password not provided', status=400)
+    if not new_password:
+        return Response('new_password not provided', status=400)
+
+
 @auth.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
+
+
     data = request.get_json()
     if not data:
         return Response('Invalid payload', status=400)
