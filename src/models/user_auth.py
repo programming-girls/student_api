@@ -8,7 +8,7 @@ from sqlalchemy_utils import ChoiceType, EmailType
 from sqlalchemy_utils.functions import foreign_keys
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from models.user_class import Person
+from src.models.user_class import Person
 
 class User(UserMixin, db.Model):
     """Users will be able to register and login.
@@ -22,7 +22,6 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
-    Person = db.relationship('Person', backref=backref('user', uselist=False), lazy='dynamic')
 
     @property
     def password(self):

@@ -1,0 +1,31 @@
+
+version: '3.8'
+
+services:
+  app:
+    build: .
+    command: /bin/sh -c ("python app.py db init && python app.py db migrate && python app.py db upgrade && gunicorn --bind 0.0.0.0:5000 app:app")
+    environment:
+      - Debug=1
+    env_file:
+      - .env
+    image: student_api
+    ports:
+      - "5000:5000"
+    depends_on: 
+      - postgres
+    restart: on-failure
+    volumes:
+      - ./:/student_api
+      
+  postgres:
+    build: ./database/
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    environment:
+      - Debug=1
+    env_file:
+      - db.env
+    volumes:
+        - /var/lib/postgresql/data

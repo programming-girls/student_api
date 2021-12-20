@@ -25,10 +25,10 @@ class Person(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
-    user = db.relationship('User', backref=db.backref('person', uselist=False), lazy='dynamic')
+    user = db.relationship('User', backref=db.backref('person', lazy='dynamic'))
 
     __mapper_args__ = {
-        "polymorphic_identity": "user",
+        "polymorphic_identity": "person",
         "polymorphic_on": user_type
     }
 

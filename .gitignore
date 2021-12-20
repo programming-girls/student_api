@@ -103,6 +103,7 @@ celerybeat.pid
 
 # Environments
 .env
+db.env
 .venv
 env/
 venv/
@@ -129,3 +130,6 @@ dmypy.json
 .pyre/
 .DS_Store
 .DS_Store/
+
+database/
+.database

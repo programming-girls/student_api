@@ -20,6 +20,7 @@ Flask-Script==2.0.6
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==0.15.1
 greenlet==1.1.2
+gunicorn==20.1.0
 idna==3.3
 importlib-metadata==4.8.1
 importlib-resources==5.4.0
@@ -31,7 +32,6 @@ MarkupSafe==2.0.1
 nltk==3.6.5
 oauthlib==2.1.0
 parameterized==0.8.1
-Pillow==8.4.0
 psycopg2-binary==2.9.2
 pycparser==2.21
 PyJWT==2.3.0
