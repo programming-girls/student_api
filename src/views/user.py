@@ -1,7 +1,5 @@
 import json
 import os
-import re
-import requests
 from flask import Blueprint, Response, redirect, url_for, request
 
 from manage import db, mail
