@@ -97,7 +97,7 @@ jobs:
       - *cmd_change_owner
       - *cmd_restore_cache
       - attach_workspace:
-          at: ~/art-backend/tmp
+          at: ~/STUDENT_API/tmp
       - run:
           name: run tests
           command: |
@@ -120,7 +120,7 @@ jobs:
         - *cmd_change_owner
         - *cmd_restore_cache
         - attach_workspace:
-            at: ~/art-backend/tmp
+            at: ~/STUDENT_API/tmp
         - run:
             name: diff cover
             command: pipenv run diff-cover tmp/coverage.xml --compare-branch=origin/develop --fail-under=90

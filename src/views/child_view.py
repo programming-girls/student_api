@@ -49,7 +49,6 @@ def get_token():
             }
         return user.id
 
-# @login_required
 @child.route('/child', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def child_view():
     '''
