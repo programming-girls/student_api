@@ -1,3 +1,4 @@
+import os
 from flask_login import LoginManager
 from flask import render_template
 
@@ -27,6 +28,8 @@ app.register_blueprint(google_blueprint, url_prefix='/google')
 app.register_blueprint(facebook_blueprint, url_prefix='/facebook')
 
 login_manager = LoginManager()
+
+app.config.from_object(os.environ['APP_SETTINGS'])
 
 with app.app_context():
     from src.models.user_class import Child, Parent

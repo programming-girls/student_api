@@ -11,7 +11,7 @@ from flask_dance.contrib.google import google
 
 auth = Blueprint('auth', __name__)
 
-@auth.route('/register', methods=['GET', 'POST'])
+@auth.route('/register', methods=['POST'])
 def register():
     """
     Handle requests to the /register route
@@ -48,7 +48,7 @@ def register():
     }
         return Response(json.dumps(response), status=200, mimetype='application/json')
 
-@auth.route('/login', methods=['GET', 'POST'])
+@auth.route('/login', methods=['POST'])
 def login():
     """
     Handle requests to the /login route
@@ -115,7 +115,7 @@ def change_password(token):
         return Response('new_password not provided', status=400)
 
 
-@auth.route('/reset_password/<token>', methods=['GET', 'POST'])
+@auth.route('/reset_password/<token>', methods=['POST'])
 def reset_password(token):
 
 

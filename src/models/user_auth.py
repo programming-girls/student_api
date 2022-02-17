@@ -40,6 +40,18 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password_hash, password)
 
+    def generate_reset_token(self, expires_in=600, user_id=None):  
+        payload = {
+            'exp': dt.datetime.utcnow() + dt.timedelta(seconds=expires_in),
+            'iat': dt.datetime.utcnow(),
+            'sub': user_id
+        } 
+        return jwt.encode(
+            payload,
+            app.config['SECRET_KEY'],
+            algorithm='HS256'
+        )
+
     def generate_auth_token(self, user_id):
         """Generates the auth token and returns it
         """
