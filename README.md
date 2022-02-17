@@ -33,7 +33,7 @@ Perform migrations
 ```
 python3 manage.py makemigrations
 python3 manage.py migrate
-python3 data/loaddata.py
+python3 data/loaddata.py -f data/user_data.json
 ```
 
 

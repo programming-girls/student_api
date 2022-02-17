@@ -1,5 +1,5 @@
 import os, sys
-from ..manage import app
+from manage import app
 from flask.ext.script import Manager
 
 manager = Manager(app)
@@ -8,7 +8,7 @@ manager = Manager(app)
 @manager.option('-f', '--fixture', default=None, help='Providing initial data for models Via fixture file')
 def loaddata(fixture):
     if not os.path.isfile(fixture):
-        print("please provoid a fixture file name")
+        print("please provide a fixture file name")
     else:
         objects = get_fixture_objects(fixture)
         from sqlalchemy import create_engine
