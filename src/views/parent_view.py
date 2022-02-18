@@ -11,10 +11,10 @@ import random
 import requests
 from manage import app, db
 from flask.json import jsonify
-# from src import login_required
 from flask import Blueprint, request, Response
 from src.models.user_class import Child, Parent
 from src.models.user_auth import User
+from flask_security import login_required
 
 
 parent = Blueprint('parent', __name__)
@@ -47,7 +47,7 @@ def get_token():
             }
         return user.id
 
-# @login_required
+@login_required
 @parent.route('/parent', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def parent_():
     

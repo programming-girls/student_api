@@ -2,13 +2,23 @@ import jwt
 from sqlalchemy.orm import backref
 from manage import db, app
 import datetime as dt
-from flask_login import UserMixin, login_manager
 from datetime import datetime
 from sqlalchemy_utils import ChoiceType, EmailType
 from sqlalchemy_utils.functions import foreign_keys
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_security import UserMixin, RoleMixin
 
 from src.models.user_class import Person
+
+roles_users = db.Table('roles_users',
+        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+        db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
+
+class Role(db.Model, RoleMixin):
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+
 
 class User(UserMixin, db.Model):
     """Users will be able to register and login.
@@ -22,6 +32,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    roles = db.relationship('Role', secondary=roles_users,
+                            backref=db.backref('users', lazy='dynamic'))
+
 
     @property
     def password(self):

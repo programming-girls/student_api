@@ -1,13 +1,15 @@
 import os
-from flask_login import LoginManager
 from flask import render_template
-
 from manage import app, db
-from src.models.childs_exam import Childs_Answer
-from src.models.user_class import Child, Parent
-from src.models.user_auth import User
+from src.models.user_auth import User, Role
+from flask_login import LoginManager
+from flask_security import Security, SQLAlchemyUserDatastore
 
+# Setup Flask-Security
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
 
+login_manager = LoginManager()
 
 
 #blueprints
@@ -27,24 +29,21 @@ app.register_blueprint(parent, name = 'p')
 app.register_blueprint(google_blueprint, url_prefix='/google')
 app.register_blueprint(facebook_blueprint, url_prefix='/facebook')
 
-login_manager = LoginManager()
 
 app.config.from_object(os.environ['APP_SETTINGS'])
 
 with app.app_context():
     from src.models.user_class import Child, Parent
-    from src.models.user_auth import User
+    from src.models.user_auth import User, Role
     from src.models.childs_exam import Childs_Answer
 
     db.init_app(app)
     db.create_all()
     login_manager.init_app(app)
-    login_manager.login_view = "login"
-
- # Set up user_loader
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = "You must be logged in to access this page."
+    login_manager.login_message_category = "info"
+    
 
 @app.route('/')
 def hello():

@@ -3,29 +3,20 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_mail import Mail
+from flask_wtf.csrf import CSRFProtect
 
 
 app = Flask(__name__)
-if os.environ == 'HEROKU':
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('HEROKU_POSTGRESQL_JADE_URL')
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL_'] 
-    
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
 
-app.config['MAIL_SERVER'] = os.environ['MAIL_SERVER']
-app.config['MAIL_PORT'] = os.environ['MAIL_PORT']
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = os.environ['MAIL_USERNAME']
-app.config['MAIL_PASSWORD'] = os.environ['MAIL_PASSWORD']
+app.config.from_object(os.environ['APP_SETTINGS'])
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+)
 
-
-
-SECRET_KEY = os.urandom(32)
-app.config['SECRET_KEY'] = SECRET_KEY
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
+csrf = CSRFProtect(app)
 

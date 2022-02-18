@@ -2,7 +2,7 @@ import os
 import json
 import pytest
 from config import TestingConfig
-from src.models.user_auth import User, BlacklistToken
+from src.models.user_auth import User
 
 from app import app, db
 

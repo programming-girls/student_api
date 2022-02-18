@@ -1,6 +1,10 @@
 import json
 import os
 from flask import Blueprint, Response, redirect, url_for, request
+from flask_login import login_user, logout_user, login_required, current_user, fresh_login_required, \
+    login_required
+from app import login_manager
+
 
 from manage import db, mail
 from flask_mail import Message
@@ -38,15 +42,8 @@ def register():
         user = User(email=email, password=password)
         db.session.add(user)
         db.session.commit()
-
-
-        # to do: assert user is in db before generating token
-
-        auth_token = user.generate_auth_token(user.id)
-        response = {
-        'Authorization': auth_token
-    }
-        return Response(json.dumps(response), status=200, mimetype='application/json')
+        login_user(user)
+        return Response('User registered', status=200)
 
 @auth.route('/login', methods=['POST'])
 def login():
@@ -54,6 +51,11 @@ def login():
     Handle requests to the /login route
     Log an User in through the login form
     """
+
+    # bypass if user is already logged in
+    if current_user.is_authenticated:
+        pass
+
     data = request.get_json()
 
     if not data:
@@ -72,13 +74,11 @@ def login():
         return Response('user not found', status=400)
 
     if not user.verify_password(password):
-        return Response('invalid password', status=400)
+        return Response('Please check your login details and try again', status=400)
     
-    auth_token = user.generate_auth_token(user.id)
-    response = {
-        'Authorization': auth_token
-    }
-    return Response(json.dumps(response), status=201, mimetype='application/json')
+    login_user(user, remember=True)
+
+    return Response('You are now logged in',status=201)
 
 @auth.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -136,44 +136,24 @@ def reset_password(token):
     return redirect(url_for('auth.login'))
 
 @auth.route('/logout', methods=['POST'])
+@login_required
 def logout():
-    auth_header = request.headers.get('Authorization')
-    if auth_header:
-        auth_token = auth_header.split(" ")[1]
-    else:
-        auth_token = ''
-    if auth_token:
-        resp = User.decode_auth_token(auth_token)
-        if not isinstance(resp, str):
-            # mark the token as blacklisted
-            blacklist_token = BlacklistToken(token=auth_token)
-            try:
-                # insert the token
-                db.session.add(blacklist_token)
-                db.session.commit()
-                responseObject = {
-                    'status': 'success',
-                    'message': 'Successfully logged out.'
-                }
-                return Response(json.dumps(responseObject), status=200, mimetype='application/json')
-            except Exception as e:
-                responseObject = {
-                    'status': 'fail',
-                    'message': e
-                }
-                return Response(json.dumps(responseObject), status=200, mimetype='application/json')
-        else:
-            responseObject = {
-                'status': 'fail',
-                'message': resp
-            }
-            return Response(json.dumps(responseObject), status=200, mimetype='application/json')
-    else:
-        responseObject = {
-            'status': 'fail',
-            'message': 'Provide a valid auth token.'
-        }
-        return Response(json.dumps(responseObject), status=200, mimetype='application/json')
+    logout_user()
+    return Response('logged out', status=200)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Check if user is logged-in on every page load."""
+    if user_id is not None:
+        return User.query.get(user_id)
+    return Response('User not found', status=400)
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    """Redirect unauthorized users to Login page."""
+    return Response('You must be logged in to view that page.', status=401)
     
     
 @auth.route('/google_login', methods=['GET', 'POST'])
