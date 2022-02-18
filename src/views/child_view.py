@@ -25,6 +25,34 @@ user_keys = ['firstname', 'lastname', 'gender','gender', 'yob', 'name_of_physica
 exam_keys = ['child_id', 'question_id', 'answer_id']
 EXAM_API_URL = os.environ['EXAM_API_URL']
 
+def score(ans_id: int, question_id: int, ans_text: str) -> int:
+    '''
+    Calculate score of answer
+    '''
+    score = 0
+
+    if not question_id:
+        return score
+
+    if ans_id == None and ans_text is None: # if no answer is given either as text or id, then score is 0
+        return score
+
+    if ans_id and question_id: # if question and ans_id are given, then call api to get choice answer
+        data = {
+            'question_id': question_id,
+            'student_choice': ans_id
+        }
+        score = requests.get(EXAM_API_URL + '/cms', data=data)
+
+    if ans_text and question_id: # if question and ans_text are given, then call api to get text answer
+        data = {
+            'question_id': question_id,
+            'student_answer': ans_text
+        }
+        score = requests.get(EXAM_API_URL + '/tms', data=data)
+
+    return score
+
 @child.route('/child', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @login_required
 def child_view():
@@ -115,39 +143,14 @@ def child_exams(child_id):
             res = Childs_Answer.query.filter_by(child_id=child_id).all()
             return Response([i.serialize() for i in res])
 
-        def score(ans_id, question_id, ans_text):
-            score = 0
-            if ans_id == 0 and ans_text is None:
-                score = 0
-
-            if ans_id is None and ans_text is None:
-                data = {
-                    'question_id': question_id,
-                    'student_choice': ans_id
-                }
-                score = requests.get(EXAM_API_URL + '/cms', data=data)
-
-            if ans_text == 0 and ans_id == 0:
-
-                # TO: DO change correct_answer and question_score to API calls
-
-                correct_answer = 'Answer.query.filter_by(question_id=question_id).filter_by(ans_text).first()'
-                question_score = 'Question.query.filter_by(id=question_id).filter_by(score).first()'
-
-                data = {
-                    'student_answer': ans_text,
-                    'correct_answer': correct_ans_text,
-                    'question_score': ans_score
-                }
-                score = requests.get(EXAM_API_URL + '/tms', data=data)
-            return score
-            
+        data = request.get_json()
+        if not data:
+            return Response('Invalid Payload',status=400)
 
         if request.method == 'POST':
-
-            correct_ans_text = 'something'
-            ans_score = 100
-
+            '''
+            child answers an exam question
+            '''
             a = Childs_Answer(
                 child_id = child_id,
                 question_id = request.form['question_id'],
